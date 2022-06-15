@@ -7,3 +7,8 @@ Mainly includes:
 + Urban governance and public policies;
 
 + Some energy-related and sustainability policies;
+
+
+Plans:
+
+7-10 per week
