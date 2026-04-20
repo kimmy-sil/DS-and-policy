@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>Python 冲关小游戏：极简骨架版</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f7f4ee;
+      color: #2c241d;
+    }
+    header {
+      padding: 18px 20px;
+      text-align: center;
+      background: linear-gradient(135deg, #ffd8bf, #ffd2e2);
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+    header h1 { margin: 0 0 6px; font-size: 22px; }
+    header p { margin: 0; font-size: 13px; color: #5b5148; }
+    main {
+      max-width: 1120px;
+      margin: 18px auto 30px;
+      padding: 0 14px;
+      display: grid;
+      grid-template-columns: 1.3fr 0.95fr;
+      gap: 16px;
+    }
+    @media (max-width: 920px) { main { grid-template-columns: 1fr; } }
+    .card {
+      background: #fffdf9;
+      border: 1px solid rgba(0,0,0,0.06);
+      border-radius: 14px;
+      box-shadow: 0 8px 24px rgba(47,35,24,0.06);
+      padding: 16px;
+    }
+    .small { font-size: 12px; color: #776d63; line-height: 1.55; }
+    .pill {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      background: #fff;
+      border: 1px solid rgba(0,0,0,0.08);
+      margin-right: 6px;
+      margin-bottom: 6px;
+    }
+    textarea {
+      width: 100%;
+      min-height: 430px;
+      resize: vertical;
+      border-radius: 10px;
+      border: 1px solid #d8d0c6;
+      padding: 12px;
+      background: #fbfaf7;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 13px;
+      line-height: 1.55;
+      color: #1f1b16;
+    }
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+      align-items: center;
+    }
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 9px 14px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    #run-btn { background: #0a7a7a; color: white; }
+    #reset-btn { background: #ece7df; color: #433b32; }
+    #output {
+      margin-top: 12px;
+      min-height: 170px;
+      border-radius: 10px;
+      background: #151515;
+      color: #e9f6ec;
+      padding: 12px;
+      white-space: pre-wrap;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12px;
+      line-height: 1.5;
+      overflow-x: auto;
+    }
+    .progress-head {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      margin-bottom: 6px;
+      color: #655b51;
+    }
+    .progress-bar {
+      height: 16px;
+      border-radius: 999px;
+      background: #efe7dc;
+      overflow: hidden;
+      border: 1px solid rgba(0,0,0,0.05);
+    }
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #ff9f68, #ffc56d);
+      transition: width 0.45s ease;
+    }
+    .status-box {
+      margin-top: 10px;
+      min-height: 56px;
+      font-size: 13px;
+      line-height: 1.55;
+      color: #4d443c;
+    }
+    .checklist { margin-top: 10px; display: grid; gap: 7px; }
+    .check-item { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; }
+    .dot {
+      width: 12px; height: 12px; margin-top: 3px; border-radius: 999px;
+      border: 1px solid #c7bcb0; background: #fff; flex: 0 0 auto;
+    }
+    .dot.done { background: #4caf50; border-color: #4caf50; box-shadow: 0 0 0 3px rgba(76,175,80,0.12); }
+    .scene {
+      margin-top: 14px; height: 210px; border-radius: 16px;
+      background: linear-gradient(180deg, #fff6e8, #ffe6d6);
+      position: relative; overflow: hidden; border: 1px solid rgba(0,0,0,0.05);
+    }
+    .scene-text {
+      position: absolute; top: 12px; left: 14px; right: 14px;
+      font-size: 13px; color: #6a5f54; text-align: center; z-index: 2;
+    }
+    .shop {
+      position: absolute; left: 18px; right: 18px; bottom: 18px; height: 88px;
+      background: #ffd7c2; border-radius: 14px; box-shadow: 0 10px 18px rgba(0,0,0,0.08);
+      display: flex; align-items: end; padding: 12px; gap: 12px;
+    }
+    .sign {
+      width: 105px; height: 60px; background: linear-gradient(180deg, #ff998f, #ffb68a);
+      border-radius: 12px; color: white; font-size: 14px; display: flex; align-items: center;
+      justify-content: center; font-weight: 700; letter-spacing: 1px;
+    }
+    .cups { display: flex; align-items: end; gap: 10px; flex: 1; height: 60px; }
+    .cup {
+      width: 24px; border-radius: 6px 6px 4px 4px; background: #f0c38a; position: relative;
+      opacity: 0.32; transform: translateY(10px) scale(0.95); transition: all 0.35s ease;
+    }
+    .cup::before {
+      content: ""; position: absolute; left: 3px; right: 3px; top: -5px; height: 4px;
+      background: white; border-radius: 4px 4px 0 0;
+    }
+    .cup.c1 { height: 22px; }
+    .cup.c2 { height: 30px; }
+    .cup.c3 { height: 38px; }
+    .cup.c4 { height: 48px; }
+    .cup.on { opacity: 1; transform: translateY(0) scale(1); box-shadow: 0 0 16px rgba(255,130,76,0.45); background: #ffbb6c; }
+    .flag {
+      position: absolute; right: 26px; top: 78px; width: 18px; height: 78px;
+      background: #8d7b68; border-radius: 999px; opacity: 0.25; transition: opacity 0.3s ease;
+    }
+    .flag::after {
+      content: ""; position: absolute; top: 8px; left: 18px; width: 0; height: 0;
+      border-top: 12px solid transparent; border-bottom: 12px solid transparent;
+      border-left: 26px solid #ff7a59; opacity: 0; transition: opacity 0.3s ease, transform 0.3s ease;
+      transform: translateX(-6px);
+    }
+    .flag.done { opacity: 1; }
+    .flag.done::after { opacity: 1; transform: translateX(0); }
+    .fireworks {
+      position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity 0.3s ease;
+    }
+    .fireworks.on { opacity: 1; }
+    .spark {
+      position: absolute; width: 7px; height: 7px; border-radius: 999px; animation: blast 1s ease-out infinite;
+    }
+    .s1 { left: 18%; top: 22%; background: #ff7a59; animation-delay: 0s; }
+    .s2 { left: 33%; top: 16%; background: #ffd05b; animation-delay: .2s; }
+    .s3 { left: 62%; top: 20%; background: #6dc7c7; animation-delay: .4s; }
+    .s4 { left: 78%; top: 26%; background: #ff8cc6; animation-delay: .6s; }
+    @keyframes blast {
+      0% { transform: scale(0.2); opacity: 0; }
+      30% { transform: scale(1.35); opacity: 1; }
+      100% { transform: scale(0.1); opacity: 0; }
+    }
+    code { background: rgba(0,0,0,0.04); padding: 1px 4px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Python 冲关小游戏：极简骨架版</h1>
+    <p>这版默认只给函数名和 <code>return</code> 位置，更适合让学生自己补全。</p>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>代码区</h2>
+      <div class="small" style="margin-bottom:10px;">
+        <span class="pill">更简单示例</span>
+        <span class="pill">只有 def / return 骨架</span>
+        <span class="pill">适合课堂补全</span>
+      </div>
+      <textarea id="code-input"></textarea>
+      <div class="actions">
+        <button id="run-btn">运行并检测</button>
+        <button id="reset-btn">恢复极简示例</button>
+        <span class="small">系统会自动输入：120, 150, 90, 200, 180, 60，然后空行结束。</span>
+      </div>
+      <div id="output">（运行结果会显示在这里）</div>
+    </section>
+
+    <section>
+      <div class="card">
+        <h2>冲关进度</h2>
+        <div class="progress-head">
+          <span>整体完成度</span>
+          <span id="progress-text">0%</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+        <div class="status-box" id="status-box">先把 <strong>getNum()</strong> 补完整，让程序能读入多行数字。</div>
+        <div class="checklist">
+          <div class="check-item"><span class="dot" id="dot1"></span><span>第 1 步：完成 <code>getNum()</code></span></div>
+          <div class="check-item"><span class="dot" id="dot2"></span><span>第 2 步：完成 <code>mean()</code></span></div>
+          <div class="check-item"><span class="dot" id="dot3"></span><span>第 3 步：完成 <code>dev()</code></span></div>
+          <div class="check-item"><span class="dot" id="dot4"></span><span>第 4 步：完成 <code>median()</code></span></div>
+          <div class="check-item"><span class="dot" id="dot5"></span><span>第 5 步：正确打印结果</span></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:16px;">
+        <h2>奶茶店动画</h2>
+        <div class="scene">
+          <div class="scene-text" id="scene-text">还没开张：先运行一次，看看自己离通关有多远。</div>
+          <div class="flag" id="flag"></div>
+          <div class="shop">
+            <div class="sign">奶茶店</div>
+            <div class="cups">
+              <div class="cup c1" id="cup1"></div>
+              <div class="cup c2" id="cup2"></div>
+              <div class="cup c3" id="cup3"></div>
+              <div class="cup c4" id="cup4"></div>
+            </div>
+          </div>
+          <div class="fireworks" id="fireworks">
+            <div class="spark s1"></div>
+            <div class="spark s2"></div>
+            <div class="spark s3"></div>
+            <div class="spark s4"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
+  <script>
+    let pyodideReadyPromise = null;
+    async function loadEngine() {
+      const pyodide = await loadPyodide({ indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.24.1/full/' });
+      return pyodide;
+    }
+
+    function defaultCode() {
+      return `def getNum():
+    return []
+
+def mean(numbers):
+    return 0
+
+def dev(numbers, mean_value):
+    return 0
+
+def median(numbers):
+    return 0
+
+data = getNum()
+m = mean(data)
+d = dev(data, m)
+md = median(data)
+
+print(f"平均值: {m:.2f}")
+print(f"标准差: {d:.2f}")
+print(f"中位数: {md}")`;
+    }
+
+    const codeInput = document.getElementById('code-input');
+    const runBtn = document.getElementById('run-btn');
+    const resetBtn = document.getElementById('reset-btn');
+    const outputEl = document.getElementById('output');
+    const progressFill = document.getElementById('progress-fill');
+    const progressText = document.getElementById('progress-text');
+    const statusBox = document.getElementById('status-box');
+    const sceneText = document.getElementById('scene-text');
+    const flag = document.getElementById('flag');
+    const fireworks = document.getElementById('fireworks');
+    const dots = [1,2,3,4,5].map(n => document.getElementById('dot' + n));
+    const cups = [1,2,3,4].map(n => document.getElementById('cup' + n));
+
+    function setDone(index, done) { dots[index].classList.toggle('done', done); }
+
+    function updateScene(progress) {
+      cups[0].classList.toggle('on', progress >= 20);
+      cups[1].classList.toggle('on', progress >= 40);
+      cups[2].classList.toggle('on', progress >= 60);
+      cups[3].classList.toggle('on', progress >= 80);
+      flag.classList.toggle('done', progress >= 100);
+      fireworks.classList.toggle('on', progress >= 100);
+
+      if (progress === 0) sceneText.textContent = '还没开张：先运行一次，看看自己离通关有多远。';
+      else if (progress <= 20) sceneText.textContent = '店铺开门了：先让 getNum() 真正读入数据。';
+      else if (progress <= 40) sceneText.textContent = '第一杯奶茶做好了：继续完成 mean()。';
+      else if (progress <= 60) sceneText.textContent = '数据分析进行中：现在去补 dev()。';
+      else if (progress <= 80) sceneText.textContent = '快通关了：把 median() 的排序与奇偶处理补上。';
+      else if (progress < 100) sceneText.textContent = '最后一步：检查输出是否完整。';
+      else sceneText.textContent = '🎉 通关成功：奶茶店经营报告已经完成！';
+    }
+
+    function analyze(codeText, outputText) {
+      const code = codeText.toLowerCase();
+      const out = (outputText || '').toLowerCase();
+      const usesStatistics = code.includes('import statistics') || code.includes('statistics.') || code.includes('st.mean') || code.includes('st.pstdev') || code.includes('st.median');
+
+      const step1 = code.includes('def getnum') && code.includes('while') && code.includes('input(') && code.includes('append(') && !code.includes('return []');
+      const step2 = code.includes('def mean') && code.includes('for num in numbers') && code.includes('len(numbers)') && !code.includes('return 0');
+      const step3 = code.includes('def dev') && code.includes('(num - mean_value) ** 2') && code.includes('** 0.5') && !code.includes('return 0');
+      const step4 = code.includes('def median') && code.includes('sorted(') && code.includes('size % 2') && !code.includes('return 0');
+      const step5 = out.includes('平均值:') && out.includes('标准差:') && out.includes('中位数:');
+
+      const steps = [step1, step2 && !usesStatistics, step3 && !usesStatistics, step4 && !usesStatistics, step5];
+      steps.forEach((ok, i) => setDone(i, ok));
+      const progress = Math.round(steps.filter(Boolean).length / 5 * 100);
+      progressFill.style.width = progress + '%';
+      progressText.textContent = progress + '%';
+      updateScene(progress);
+
+      if (usesStatistics) {
+        statusBox.innerHTML = '检测到你直接调用了 <code>statistics</code> 模块。本关目标是手写函数。';
+        return;
+      }
+      if (progress === 0) statusBox.innerHTML = '现在还是最小骨架。先把 <strong>getNum()</strong> 从 <code>return []</code> 改成真正读取数据的版本。';
+      else if (progress <= 20) statusBox.innerHTML = '很好，已经有输入函数了。接下来去完成 <strong>mean()</strong>。';
+      else if (progress <= 40) statusBox.innerHTML = '平均值快有了。现在去完成 <strong>dev()</strong> 的平方差公式。';
+      else if (progress <= 60) statusBox.innerHTML = '已经过半了。去完成 <strong>median()</strong>，记得先排序。';
+      else if (progress <= 80) statusBox.innerHTML = '离胜利很近了。最后检查输出是否规范打印。';
+      else if (progress < 100) statusBox.innerHTML = '结构基本完整，再检查一遍公式和输出。';
+      else statusBox.innerHTML = '🎉 恭喜，你已经完成了极简骨架版这一关。';
+    }
+
+    async function runCode() {
+      const code = codeInput.value;
+      if (!code.trim()) {
+        outputEl.textContent = '请先输入代码。';
+        return;
+      }
+      runBtn.disabled = true;
+      runBtn.textContent = '运行中...';
+      outputEl.textContent = '正在加载 Python 运行环境...（首次打开会稍慢）';
+
+      try {
+        if (!pyodideReadyPromise) pyodideReadyPromise = loadEngine();
+        const pyodide = await pyodideReadyPromise;
+
+        const inputs = ['120\n','150\n','90\n','200\n','180\n','60\n','\n'];
+        let captured = '';
+        let idx = 0;
+        const oldInput = pyodide.globals.get('input');
+        const oldPrint = pyodide.globals.get('print');
+
+        function fakeInput(prompt) {
+          if (prompt) captured += String(prompt);
+          const value = inputs[idx] ?? '\n';
+          idx += 1;
+          captured += value;
+          return value.replace(/\n$/, '');
+        }
+        function fakePrint() {
+          captured += Array.from(arguments).map(String).join(' ') + '\n';
+        }
+
+        pyodide.globals.set('input', fakeInput);
+        pyodide.globals.set('print', fakePrint);
+
+        try {
+          await pyodide.runPythonAsync(code);
+          outputEl.textContent = captured || '（程序没有输出内容）';
+        } catch (err) {
+          outputEl.textContent = '执行出错：\n' + err;
+        } finally {
+          pyodide.globals.set('input', oldInput);
+          pyodide.globals.set('print', oldPrint);
+        }
+
+        analyze(code, outputEl.textContent);
+      } catch (e) {
+        outputEl.textContent = '加载或执行失败：' + e;
+      } finally {
+        runBtn.disabled = false;
+        runBtn.textContent = '运行并检测';
+      }
+    }
+
+    runBtn.addEventListener('click', runCode);
+    resetBtn.addEventListener('click', () => {
+      codeInput.value = defaultCode();
+      outputEl.textContent = '（运行结果会显示在这里）';
+      progressFill.style.width = '0%';
+      progressText.textContent = '0%';
+      statusBox.innerHTML = '先把 <strong>getNum()</strong> 补完整，让程序能读入多行数字。';
+      dots.forEach(dot => dot.classList.remove('done'));
+      updateScene(0);
+    });
+
+    codeInput.value = defaultCode();
+    updateScene(0);
+  </script>
+</body>
+</html>
