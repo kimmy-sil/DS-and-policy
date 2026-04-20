@@ -202,7 +202,7 @@
       <div class="actions">
         <button id="run-btn">运行并检测</button>
         <button id="reset-btn">恢复极简示例</button>
-        <span class="small">系统会自动适配两种测试输入：多行数字，或逗号分隔的一行数字。</span>
+        <span class="small">系统会依次测试两种输入：先试逗号分隔的一行，再试多行数字。</span>
       </div>
       <div id="output">（运行结果会显示在这里）</div>
     </section>
@@ -215,7 +215,7 @@
           <span id="progress-text">0%</span>
         </div>
         <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
-        <div class="status-box" id="status-box">先写出一个能跑起来的版本。只要运行正确、输出正确，也可以通关。</div>
+        <div class="status-box" id="status-box">先写出一个能跑起来的版本。系统会自动用双模式测试：逗号一行输入 + 多行输入。</div>
         <div class="checklist">
           <div class="check-item"><span class="dot" id="dot1"></span><span>第 1 步：能读取输入（多行或逗号分隔都行）</span></div>
           <div class="check-item"><span class="dot" id="dot2"></span><span>第 2 步：能算平均值（手写或调库都行）</span></div>
@@ -377,6 +377,49 @@ print(f"中位数: {md}")`;
       else statusBox.innerHTML = '已经很接近通关了。检查测试数据下的输出结果是否与正确答案一致。';
     }
 
+    async function executeWithInputs(pyodide, code, inputs, modeLabel) {
+      let captured = '';
+      let idx = 0;
+      let runtimeOk = false;
+      const oldInput = pyodide.globals.get('input');
+      const oldPrint = pyodide.globals.get('print');
+
+      function fakeInput(prompt) {
+        if (prompt) captured += String(prompt);
+        const value = inputs[idx] ?? '
+';
+        idx += 1;
+        captured += value;
+        return value.replace(/
+$/, '');
+      }
+      function fakePrint() {
+        captured += Array.from(arguments).map(String).join(' ') + '
+';
+      }
+
+      pyodide.globals.set('input', fakeInput);
+      pyodide.globals.set('print', fakePrint);
+
+      try {
+        await pyodide.runPythonAsync(code);
+        runtimeOk = true;
+      } catch (err) {
+        captured = '执行出错：
+' + err;
+      } finally {
+        pyodide.globals.set('input', oldInput);
+        pyodide.globals.set('print', oldPrint);
+      }
+
+      const meanValue = extractValue(captured, ['平均值', 'mean']);
+      const stdValue = extractValue(captured, ['标准差', 'std']);
+      const medianValue = extractValue(captured, ['中位数', 'median']);
+      const outputOk = runtimeOk && approxEqual(meanValue, EXPECTED.mean) && approxEqual(stdValue, EXPECTED.std) && approxEqual(medianValue, EXPECTED.median);
+
+      return { modeLabel, runtimeOk, outputOk, captured: captured || '（程序没有输出内容）' };
+    }
+
     async function runCode() {
       const code = codeInput.value;
       if (!code.trim()) {
@@ -391,46 +434,43 @@ print(f"中位数: {md}")`;
         if (!pyodideReadyPromise) pyodideReadyPromise = loadEngine();
         const pyodide = await pyodideReadyPromise;
 
-        const codeLower = code.toLowerCase();
-        const useCommaInput = codeLower.includes('split(') || codeLower.includes('逗号');
-        const multiInputs = ['120\n','150\n','90\n','200\n','180\n','60\n','\n'];
-        const commaInput = ['120,150,90,200,180,60\n'];
-        const inputs = useCommaInput ? commaInput : multiInputs;
+        const tests = [
+          { modeLabel: '逗号输入模式', inputs: ['120,150,90,200,180,60
+'] },
+          { modeLabel: '多行输入模式', inputs: ['120
+','150
+','90
+','200
+','180
+','60
+','
+'] }
+        ];
 
-        let captured = '';
-        let idx = 0;
-        let runtimeOk = false;
-        const oldInput = pyodide.globals.get('input');
-        const oldPrint = pyodide.globals.get('print');
-
-        function fakeInput(prompt) {
-          if (prompt) captured += String(prompt);
-          const value = inputs[idx] ?? (useCommaInput ? '\n' : '\n');
-          idx += 1;
-          captured += value;
-          return value.replace(/\n$/, '');
-        }
-        function fakePrint() {
-          captured += Array.from(arguments).map(String).join(' ') + '\n';
+        const results = [];
+        for (const test of tests) {
+          const result = await executeWithInputs(pyodide, code, test.inputs, test.modeLabel);
+          results.push(result);
+          if (result.outputOk) break;
         }
 
-        pyodide.globals.set('input', fakeInput);
-        pyodide.globals.set('print', fakePrint);
+        const chosen = results.find(r => r.outputOk) || results.find(r => r.runtimeOk) || results[0];
+        let shownOutput = chosen.captured;
+        if (chosen.outputOk) {
+          shownOutput = '【' + chosen.modeLabel + '】
+' + shownOutput;
+        } else if (results.length > 1) {
+          shownOutput = results.map(r => '【' + r.modeLabel + '】
+' + r.captured).join('
 
-        try {
-          await pyodide.runPythonAsync(code);
-          runtimeOk = true;
-          outputEl.textContent = captured || '（程序没有输出内容）';
-        } catch (err) {
-          outputEl.textContent = '执行出错：\n' + err;
-        } finally {
-          pyodide.globals.set('input', oldInput);
-          pyodide.globals.set('print', oldPrint);
+');
         }
 
-        analyze(code, outputEl.textContent, runtimeOk);
+        outputEl.textContent = shownOutput;
+        analyze(code, chosen.captured, chosen.runtimeOk);
       } catch (e) {
         outputEl.textContent = '加载或执行失败：' + e;
+        analyze(code, outputEl.textContent, false);
       } finally {
         runBtn.disabled = false;
         runBtn.textContent = '运行并检测';
@@ -443,7 +483,7 @@ print(f"中位数: {md}")`;
       outputEl.textContent = '（运行结果会显示在这里）';
       progressFill.style.width = '0%';
       progressText.textContent = '0%';
-      statusBox.innerHTML = '先写出一个能跑起来的版本。只要运行正确、输出正确，也可以通关。';
+      statusBox.innerHTML = '先写出一个能跑起来的版本。系统会自动用双模式测试：逗号一行输入 + 多行输入。';
       dots.forEach(dot => dot.classList.remove('done'));
       updateScene(0);
     });
