@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <title>Python 冲关小游戏：多写法通关版</title>
+  <title>Python 冲关小游戏：sales 列表版</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     * { box-sizing: border-box; }
@@ -50,7 +50,7 @@
     }
     textarea {
       width: 100%;
-      min-height: 430px;
+      min-height: 420px;
       resize: vertical;
       border-radius: 10px;
       border: 1px solid #d8d0c6;
@@ -79,7 +79,7 @@
     #reset-btn { background: #ece7df; color: #433b32; }
     #output {
       margin-top: 12px;
-      min-height: 180px;
+      min-height: 170px;
       border-radius: 10px;
       background: #151515;
       color: #e9f6ec;
@@ -186,23 +186,23 @@
 </head>
 <body>
   <header>
-    <h1>Python 冲关小游戏：多写法通关版</h1>
-    <p>支持多种正确写法：多行输入、一行逗号输入、手写函数版、<code>statistics</code> 调库版，都可以通关。</p>
+    <h1>Python 冲关小游戏：sales 列表版</h1>
+    <p>学生直接在代码里写 <code>sales = [120, 150, 90, 200, 180, 60]</code>，系统再根据这组数据判定结果。</p>
   </header>
 
   <main>
     <section class="card">
       <h2>代码区</h2>
       <div class="small" style="margin-bottom:10px;">
-        <span class="pill">多写法可通过</span>
-        <span class="pill">优先看运行结果</span>
-        <span class="pill">自动识别输入形式</span>
+        <span class="pill">不需要 input()</span>
+        <span class="pill">从 sales 列表判题</span>
+        <span class="pill">手写或调库都可</span>
       </div>
       <textarea id="code-input"></textarea>
       <div class="actions">
         <button id="run-btn">运行并检测</button>
-        <button id="reset-btn">恢复极简示例</button>
-        <span class="small">系统会依次测试两种输入：先试逗号分隔的一行，再试多行数字。</span>
+        <button id="reset-btn">恢复 sales 示例</button>
+        <span class="small">请先定义 <code>sales = [...]</code>，系统会自动读取这组数据并计算标准答案。</span>
       </div>
       <div id="output">（运行结果会显示在这里）</div>
     </section>
@@ -215,12 +215,12 @@
           <span id="progress-text">0%</span>
         </div>
         <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
-        <div class="status-box" id="status-box">先写出一个能跑起来的版本。系统会自动用双模式测试：逗号一行输入 + 多行输入。</div>
+        <div class="status-box" id="status-box">先在代码里定义 <strong>sales</strong> 列表，例如 <code>sales = [120, 150, 90, 200, 180, 60]</code>。</div>
         <div class="checklist">
-          <div class="check-item"><span class="dot" id="dot1"></span><span>第 1 步：能读取输入（多行或逗号分隔都行）</span></div>
-          <div class="check-item"><span class="dot" id="dot2"></span><span>第 2 步：能算平均值（手写或调库都行）</span></div>
-          <div class="check-item"><span class="dot" id="dot3"></span><span>第 3 步：能算标准差（总体）</span></div>
-          <div class="check-item"><span class="dot" id="dot4"></span><span>第 4 步：能算中位数</span></div>
+          <div class="check-item"><span class="dot" id="dot1"></span><span>第 1 步：定义 <code>sales</code> 列表</span></div>
+          <div class="check-item"><span class="dot" id="dot2"></span><span>第 2 步：算平均值</span></div>
+          <div class="check-item"><span class="dot" id="dot3"></span><span>第 3 步：算标准差（总体）</span></div>
+          <div class="check-item"><span class="dot" id="dot4"></span><span>第 4 步：算中位数</span></div>
           <div class="check-item"><span class="dot" id="dot5"></span><span>第 5 步：输出结果正确</span></div>
         </div>
       </div>
@@ -228,7 +228,7 @@
       <div class="card" style="margin-top:16px;">
         <h2>奶茶店动画</h2>
         <div class="scene">
-          <div class="scene-text" id="scene-text">还没开张：先运行一次，看看自己离通关有多远。</div>
+          <div class="scene-text" id="scene-text">还没开张：先写出 sales 列表，再运行看看。</div>
           <div class="flag" id="flag"></div>
           <div class="shop">
             <div class="sign">奶茶店</div>
@@ -259,8 +259,7 @@
     }
 
     function defaultCode() {
-      return `def getNum():
-    return []
+      return `sales = [120, 150, 90, 200, 180, 60]
 
 def mean(numbers):
     return 0
@@ -271,24 +270,14 @@ def dev(numbers, mean_value):
 def median(numbers):
     return 0
 
-data = getNum()
-m = mean(data)
-d = dev(data, m)
-md = median(data)
+m = mean(sales)
+d = dev(sales, m)
+md = median(sales)
 
 print(f"平均值: {m:.2f}")
 print(f"标准差: {d:.2f}")
 print(f"中位数: {md}")`;
     }
-
-    const TEST_DATA = [120, 150, 90, 200, 180, 60];
-    const EXPECTED = (() => {
-      const mean = TEST_DATA.reduce((a, b) => a + b, 0) / TEST_DATA.length;
-      const variance = TEST_DATA.reduce((s, x) => s + (x - mean) ** 2, 0) / TEST_DATA.length;
-      const sorted = [...TEST_DATA].sort((a, b) => a - b);
-      const median = (sorted[2] + sorted[3]) / 2;
-      return { mean, std: Math.sqrt(variance), median };
-    })();
 
     const codeInput = document.getElementById('code-input');
     const runBtn = document.getElementById('run-btn');
@@ -313,13 +302,13 @@ print(f"中位数: {md}")`;
       flag.classList.toggle('done', progress >= 100);
       fireworks.classList.toggle('on', progress >= 100);
 
-      if (progress === 0) sceneText.textContent = '还没开张：先运行一次，看看自己离通关有多远。';
-      else if (progress <= 20) sceneText.textContent = '已经开始营业：先把输入处理好。';
+      if (progress === 0) sceneText.textContent = '还没开张：先写出 sales 列表，再运行看看。';
+      else if (progress <= 20) sceneText.textContent = '已经开始营业：先把 sales 列表定义好。';
       else if (progress <= 40) sceneText.textContent = '第一杯奶茶做好了：继续拿下平均值。';
       else if (progress <= 60) sceneText.textContent = '数据分析进行中：标准差已经在路上。';
       else if (progress <= 80) sceneText.textContent = '快通关了：把中位数也拿下。';
       else if (progress < 100) sceneText.textContent = '只差最后一步：让输出结果完全正确。';
-      else sceneText.textContent = '🎉 通关成功：你这份程序已经被判定为正确！';
+      else sceneText.textContent = '🎉 通关成功：你这份 sales 程序已经被判定为正确！';
     }
 
     function approxEqual(a, b, tol = 0.05) {
@@ -328,18 +317,38 @@ print(f"中位数: {md}")`;
 
     function extractValue(text, labels) {
       for (const label of labels) {
-        const re = new RegExp(label + '\\s*[:：]\\s*(-?\\d+(?:\\.\\d+)?)', 'i');
+        const re = new RegExp(label + '\s*[:：]\s*(-?\d+(?:\.\d+)?)', 'i');
         const m = text.match(re);
         if (m) return parseFloat(m[1]);
       }
       return null;
     }
 
+    function parseSalesFromCode(codeText) {
+      const m = codeText.match(/sales\s*=\s*\[([^\]]+)\]/i);
+      if (!m) return null;
+      const arr = m[1]
+        .split(',')
+        .map(x => parseFloat(x.trim()))
+        .filter(x => !Number.isNaN(x));
+      return arr.length ? arr : null;
+    }
+
+    function calcExpected(data) {
+      const mean = data.reduce((a, b) => a + b, 0) / data.length;
+      const variance = data.reduce((s, x) => s + (x - mean) ** 2, 0) / data.length;
+      const sorted = [...data].sort((a, b) => a - b);
+      const mid = Math.floor(sorted.length / 2);
+      const median = sorted.length % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid];
+      return { mean, std: Math.sqrt(variance), median };
+    }
+
     function analyze(codeText, outputText, runtimeOk) {
       const code = codeText.toLowerCase();
-      const out = (outputText || '').toLowerCase();
+      const salesData = parseSalesFromCode(codeText);
+      const expected = salesData ? calcExpected(salesData) : null;
 
-      const inputOk = code.includes('input(') && (code.includes('while ') || code.includes('split(') || code.includes('append('));
+      const salesOk = !!salesData;
       const meanOk = code.includes('def mean') || code.includes('st.mean(') || code.includes('statistics.mean(') || code.includes('sum(numbers) / len(numbers)');
       const devOk = code.includes('def dev') || code.includes('st.pstdev(') || code.includes('statistics.pstdev(') || code.includes('** 0.5');
       const medianOk = code.includes('def median') || code.includes('st.median(') || code.includes('statistics.median(') || code.includes('sorted(numbers)');
@@ -347,13 +356,10 @@ print(f"中位数: {md}")`;
       const meanValue = extractValue(outputText, ['平均值', 'mean']);
       const stdValue = extractValue(outputText, ['标准差', 'std']);
       const medianValue = extractValue(outputText, ['中位数', 'median']);
+      const outputOk = runtimeOk && expected && approxEqual(meanValue, expected.mean) && approxEqual(stdValue, expected.std) && approxEqual(medianValue, expected.median);
 
-      const outputOk = runtimeOk && approxEqual(meanValue, EXPECTED.mean) && approxEqual(stdValue, EXPECTED.std) && approxEqual(medianValue, EXPECTED.median);
-
-      let steps = [inputOk, meanOk, devOk, medianOk, outputOk];
-      if (outputOk) {
-        steps = [true, true, true, true, true];
-      }
+      let steps = [salesOk, meanOk, devOk, medianOk, outputOk];
+      if (outputOk) steps = [true, true, true, true, true];
 
       steps.forEach((ok, i) => setDone(i, ok));
       const progress = Math.round(steps.filter(Boolean).length / 5 * 100);
@@ -361,63 +367,23 @@ print(f"中位数: {md}")`;
       progressText.textContent = progress + '%';
       updateScene(progress);
 
+      if (!salesData) {
+        statusBox.innerHTML = '请先在代码里定义 <code>sales = [120, 150, 90, 200, 180, 60]</code> 这样的列表。';
+        return;
+      }
       if (!runtimeOk) {
-        statusBox.innerHTML = '程序还没有成功运行。先把报错修掉；只要运行正确、输出正确，就可以通关。';
+        statusBox.innerHTML = '程序还没有成功运行。先把报错修掉；系统会根据你自己写的 sales 列表判定结果。';
         return;
       }
       if (outputOk) {
-        statusBox.innerHTML = '🎉 已通过：系统检测到你的程序运行正确，而且输出的平均值、标准差和中位数都正确。';
+        statusBox.innerHTML = '🎉 已通过：系统检测到你的 sales 列表和输出结果都正确。';
         return;
       }
-      if (progress === 0) statusBox.innerHTML = '先写出一个能运行的版本。多行输入、一行逗号输入、手写函数、调库版都可以。';
-      else if (progress <= 20) statusBox.innerHTML = '已经识别到输入相关代码了。下一步把平均值算出来。';
+      if (progress <= 20) statusBox.innerHTML = '已经识别到 sales 列表了。下一步把平均值算出来。';
       else if (progress <= 40) statusBox.innerHTML = '平均值思路已经有了。继续完成标准差或中位数。';
-      else if (progress <= 60) statusBox.innerHTML = '你已经过半了。现在重点检查标准差和中位数的实现。';
-      else if (progress <= 80) statusBox.innerHTML = '结构基本完整。最后确认输出值是不是正确结果。';
-      else statusBox.innerHTML = '已经很接近通关了。检查测试数据下的输出结果是否与正确答案一致。';
-    }
-
-    async function executeWithInputs(pyodide, code, inputs, modeLabel) {
-      let captured = '';
-      let idx = 0;
-      let runtimeOk = false;
-      const oldInput = pyodide.globals.get('input');
-      const oldPrint = pyodide.globals.get('print');
-
-      function fakeInput(prompt) {
-        if (prompt) captured += String(prompt);
-        const value = inputs[idx] ?? '
-';
-        idx += 1;
-        captured += value;
-        return value.replace(/
-$/, '');
-      }
-      function fakePrint() {
-        captured += Array.from(arguments).map(String).join(' ') + '
-';
-      }
-
-      pyodide.globals.set('input', fakeInput);
-      pyodide.globals.set('print', fakePrint);
-
-      try {
-        await pyodide.runPythonAsync(code);
-        runtimeOk = true;
-      } catch (err) {
-        captured = '执行出错：
-' + err;
-      } finally {
-        pyodide.globals.set('input', oldInput);
-        pyodide.globals.set('print', oldPrint);
-      }
-
-      const meanValue = extractValue(captured, ['平均值', 'mean']);
-      const stdValue = extractValue(captured, ['标准差', 'std']);
-      const medianValue = extractValue(captured, ['中位数', 'median']);
-      const outputOk = runtimeOk && approxEqual(meanValue, EXPECTED.mean) && approxEqual(stdValue, EXPECTED.std) && approxEqual(medianValue, EXPECTED.median);
-
-      return { modeLabel, runtimeOk, outputOk, captured: captured || '（程序没有输出内容）' };
+      else if (progress <= 60) statusBox.innerHTML = '你已经过半了。现在重点检查标准差和中位数。';
+      else if (progress <= 80) statusBox.innerHTML = '结构基本完整。最后确认输出值是不是基于 sales 计算出的正确结果。';
+      else statusBox.innerHTML = '已经很接近通关了。检查输出格式和结果是否完全正确。';
     }
 
     async function runCode() {
@@ -434,40 +400,29 @@ $/, '');
         if (!pyodideReadyPromise) pyodideReadyPromise = loadEngine();
         const pyodide = await pyodideReadyPromise;
 
-        const tests = [
-          { modeLabel: '逗号输入模式', inputs: ['120,150,90,200,180,60
-'] },
-          { modeLabel: '多行输入模式', inputs: ['120
-','150
-','90
-','200
-','180
-','60
-','
-'] }
-        ];
+        let captured = '';
+        let runtimeOk = false;
+        const oldPrint = pyodide.globals.get('print');
 
-        const results = [];
-        for (const test of tests) {
-          const result = await executeWithInputs(pyodide, code, test.inputs, test.modeLabel);
-          results.push(result);
-          if (result.outputOk) break;
+        function fakePrint() {
+          captured += Array.from(arguments).map(String).join(' ') + '
+';
         }
 
-        const chosen = results.find(r => r.outputOk) || results.find(r => r.runtimeOk) || results[0];
-        let shownOutput = chosen.captured;
-        if (chosen.outputOk) {
-          shownOutput = '【' + chosen.modeLabel + '】
-' + shownOutput;
-        } else if (results.length > 1) {
-          shownOutput = results.map(r => '【' + r.modeLabel + '】
-' + r.captured).join('
+        pyodide.globals.set('print', fakePrint);
 
-');
+        try {
+          await pyodide.runPythonAsync(code);
+          runtimeOk = true;
+          outputEl.textContent = captured || '（程序没有输出内容）';
+        } catch (err) {
+          outputEl.textContent = '执行出错：
+' + err;
+        } finally {
+          pyodide.globals.set('print', oldPrint);
         }
 
-        outputEl.textContent = shownOutput;
-        analyze(code, chosen.captured, chosen.runtimeOk);
+        analyze(code, outputEl.textContent, runtimeOk);
       } catch (e) {
         outputEl.textContent = '加载或执行失败：' + e;
         analyze(code, outputEl.textContent, false);
@@ -483,7 +438,7 @@ $/, '');
       outputEl.textContent = '（运行结果会显示在这里）';
       progressFill.style.width = '0%';
       progressText.textContent = '0%';
-      statusBox.innerHTML = '先写出一个能跑起来的版本。系统会自动用双模式测试：逗号一行输入 + 多行输入。';
+      statusBox.innerHTML = '先在代码里定义 <strong>sales</strong> 列表，例如 <code>sales = [120, 150, 90, 200, 180, 60]</code>。';
       dots.forEach(dot => dot.classList.remove('done'));
       updateScene(0);
     });
