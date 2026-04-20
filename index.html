@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <title>Python 冲关小游戏：极简骨架版</title>
+  <title>Python 冲关小游戏：多写法通关版</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     * { box-sizing: border-box; }
@@ -21,7 +21,7 @@
     header h1 { margin: 0 0 6px; font-size: 22px; }
     header p { margin: 0; font-size: 13px; color: #5b5148; }
     main {
-      max-width: 1120px;
+      max-width: 1140px;
       margin: 18px auto 30px;
       padding: 0 14px;
       display: grid;
@@ -36,6 +36,7 @@
       box-shadow: 0 8px 24px rgba(47,35,24,0.06);
       padding: 16px;
     }
+    h2 { margin: 0 0 10px; font-size: 17px; }
     .small { font-size: 12px; color: #776d63; line-height: 1.55; }
     .pill {
       display: inline-block;
@@ -78,7 +79,7 @@
     #reset-btn { background: #ece7df; color: #433b32; }
     #output {
       margin-top: 12px;
-      min-height: 170px;
+      min-height: 180px;
       border-radius: 10px;
       background: #151515;
       color: #e9f6ec;
@@ -111,9 +112,9 @@
     }
     .status-box {
       margin-top: 10px;
-      min-height: 56px;
+      min-height: 60px;
       font-size: 13px;
-      line-height: 1.55;
+      line-height: 1.6;
       color: #4d443c;
     }
     .checklist { margin-top: 10px; display: grid; gap: 7px; }
@@ -168,13 +169,9 @@
     }
     .flag.done { opacity: 1; }
     .flag.done::after { opacity: 1; transform: translateX(0); }
-    .fireworks {
-      position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity 0.3s ease;
-    }
+    .fireworks { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity 0.3s ease; }
     .fireworks.on { opacity: 1; }
-    .spark {
-      position: absolute; width: 7px; height: 7px; border-radius: 999px; animation: blast 1s ease-out infinite;
-    }
+    .spark { position: absolute; width: 7px; height: 7px; border-radius: 999px; animation: blast 1s ease-out infinite; }
     .s1 { left: 18%; top: 22%; background: #ff7a59; animation-delay: 0s; }
     .s2 { left: 33%; top: 16%; background: #ffd05b; animation-delay: .2s; }
     .s3 { left: 62%; top: 20%; background: #6dc7c7; animation-delay: .4s; }
@@ -189,23 +186,23 @@
 </head>
 <body>
   <header>
-    <h1>Python 冲关小游戏：极简骨架版</h1>
-    <p>这版默认只给函数名和 <code>return</code> 位置，更适合让学生自己补全。</p>
+    <h1>Python 冲关小游戏：多写法通关版</h1>
+    <p>支持多种正确写法：多行输入、一行逗号输入、手写函数版、<code>statistics</code> 调库版，都可以通关。</p>
   </header>
 
   <main>
     <section class="card">
       <h2>代码区</h2>
       <div class="small" style="margin-bottom:10px;">
-        <span class="pill">更简单示例</span>
-        <span class="pill">只有 def / return 骨架</span>
-        <span class="pill">适合课堂补全</span>
+        <span class="pill">多写法可通过</span>
+        <span class="pill">优先看运行结果</span>
+        <span class="pill">自动识别输入形式</span>
       </div>
       <textarea id="code-input"></textarea>
       <div class="actions">
         <button id="run-btn">运行并检测</button>
         <button id="reset-btn">恢复极简示例</button>
-        <span class="small">系统会自动输入：120, 150, 90, 200, 180, 60，然后空行结束。</span>
+        <span class="small">系统会自动适配两种测试输入：多行数字，或逗号分隔的一行数字。</span>
       </div>
       <div id="output">（运行结果会显示在这里）</div>
     </section>
@@ -218,13 +215,13 @@
           <span id="progress-text">0%</span>
         </div>
         <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
-        <div class="status-box" id="status-box">先把 <strong>getNum()</strong> 补完整，让程序能读入多行数字。</div>
+        <div class="status-box" id="status-box">先写出一个能跑起来的版本。只要运行正确、输出正确，也可以通关。</div>
         <div class="checklist">
-          <div class="check-item"><span class="dot" id="dot1"></span><span>第 1 步：完成 <code>getNum()</code></span></div>
-          <div class="check-item"><span class="dot" id="dot2"></span><span>第 2 步：完成 <code>mean()</code></span></div>
-          <div class="check-item"><span class="dot" id="dot3"></span><span>第 3 步：完成 <code>dev()</code></span></div>
-          <div class="check-item"><span class="dot" id="dot4"></span><span>第 4 步：完成 <code>median()</code></span></div>
-          <div class="check-item"><span class="dot" id="dot5"></span><span>第 5 步：正确打印结果</span></div>
+          <div class="check-item"><span class="dot" id="dot1"></span><span>第 1 步：能读取输入（多行或逗号分隔都行）</span></div>
+          <div class="check-item"><span class="dot" id="dot2"></span><span>第 2 步：能算平均值（手写或调库都行）</span></div>
+          <div class="check-item"><span class="dot" id="dot3"></span><span>第 3 步：能算标准差（总体）</span></div>
+          <div class="check-item"><span class="dot" id="dot4"></span><span>第 4 步：能算中位数</span></div>
+          <div class="check-item"><span class="dot" id="dot5"></span><span>第 5 步：输出结果正确</span></div>
         </div>
       </div>
 
@@ -284,6 +281,15 @@ print(f"标准差: {d:.2f}")
 print(f"中位数: {md}")`;
     }
 
+    const TEST_DATA = [120, 150, 90, 200, 180, 60];
+    const EXPECTED = (() => {
+      const mean = TEST_DATA.reduce((a, b) => a + b, 0) / TEST_DATA.length;
+      const variance = TEST_DATA.reduce((s, x) => s + (x - mean) ** 2, 0) / TEST_DATA.length;
+      const sorted = [...TEST_DATA].sort((a, b) => a - b);
+      const median = (sorted[2] + sorted[3]) / 2;
+      return { mean, std: Math.sqrt(variance), median };
+    })();
+
     const codeInput = document.getElementById('code-input');
     const runBtn = document.getElementById('run-btn');
     const resetBtn = document.getElementById('reset-btn');
@@ -308,43 +314,67 @@ print(f"中位数: {md}")`;
       fireworks.classList.toggle('on', progress >= 100);
 
       if (progress === 0) sceneText.textContent = '还没开张：先运行一次，看看自己离通关有多远。';
-      else if (progress <= 20) sceneText.textContent = '店铺开门了：先让 getNum() 真正读入数据。';
-      else if (progress <= 40) sceneText.textContent = '第一杯奶茶做好了：继续完成 mean()。';
-      else if (progress <= 60) sceneText.textContent = '数据分析进行中：现在去补 dev()。';
-      else if (progress <= 80) sceneText.textContent = '快通关了：把 median() 的排序与奇偶处理补上。';
-      else if (progress < 100) sceneText.textContent = '最后一步：检查输出是否完整。';
-      else sceneText.textContent = '🎉 通关成功：奶茶店经营报告已经完成！';
+      else if (progress <= 20) sceneText.textContent = '已经开始营业：先把输入处理好。';
+      else if (progress <= 40) sceneText.textContent = '第一杯奶茶做好了：继续拿下平均值。';
+      else if (progress <= 60) sceneText.textContent = '数据分析进行中：标准差已经在路上。';
+      else if (progress <= 80) sceneText.textContent = '快通关了：把中位数也拿下。';
+      else if (progress < 100) sceneText.textContent = '只差最后一步：让输出结果完全正确。';
+      else sceneText.textContent = '🎉 通关成功：你这份程序已经被判定为正确！';
     }
 
-    function analyze(codeText, outputText) {
+    function approxEqual(a, b, tol = 0.05) {
+      return Number.isFinite(a) && Number.isFinite(b) && Math.abs(a - b) <= tol;
+    }
+
+    function extractValue(text, labels) {
+      for (const label of labels) {
+        const re = new RegExp(label + '\\s*[:：]\\s*(-?\\d+(?:\\.\\d+)?)', 'i');
+        const m = text.match(re);
+        if (m) return parseFloat(m[1]);
+      }
+      return null;
+    }
+
+    function analyze(codeText, outputText, runtimeOk) {
       const code = codeText.toLowerCase();
       const out = (outputText || '').toLowerCase();
-      const usesStatistics = code.includes('import statistics') || code.includes('statistics.') || code.includes('st.mean') || code.includes('st.pstdev') || code.includes('st.median');
 
-      const step1 = code.includes('def getnum') && code.includes('while') && code.includes('input(') && code.includes('append(') && !code.includes('return []');
-      const step2 = code.includes('def mean') && code.includes('for num in numbers') && code.includes('len(numbers)') && !code.includes('return 0');
-      const step3 = code.includes('def dev') && code.includes('(num - mean_value) ** 2') && code.includes('** 0.5') && !code.includes('return 0');
-      const step4 = code.includes('def median') && code.includes('sorted(') && code.includes('size % 2') && !code.includes('return 0');
-      const step5 = out.includes('平均值:') && out.includes('标准差:') && out.includes('中位数:');
+      const inputOk = code.includes('input(') && (code.includes('while ') || code.includes('split(') || code.includes('append('));
+      const meanOk = code.includes('def mean') || code.includes('st.mean(') || code.includes('statistics.mean(') || code.includes('sum(numbers) / len(numbers)');
+      const devOk = code.includes('def dev') || code.includes('st.pstdev(') || code.includes('statistics.pstdev(') || code.includes('** 0.5');
+      const medianOk = code.includes('def median') || code.includes('st.median(') || code.includes('statistics.median(') || code.includes('sorted(numbers)');
 
-      const steps = [step1, step2 && !usesStatistics, step3 && !usesStatistics, step4 && !usesStatistics, step5];
+      const meanValue = extractValue(outputText, ['平均值', 'mean']);
+      const stdValue = extractValue(outputText, ['标准差', 'std']);
+      const medianValue = extractValue(outputText, ['中位数', 'median']);
+
+      const outputOk = runtimeOk && approxEqual(meanValue, EXPECTED.mean) && approxEqual(stdValue, EXPECTED.std) && approxEqual(medianValue, EXPECTED.median);
+
+      let steps = [inputOk, meanOk, devOk, medianOk, outputOk];
+      if (outputOk) {
+        steps = [true, true, true, true, true];
+      }
+
       steps.forEach((ok, i) => setDone(i, ok));
       const progress = Math.round(steps.filter(Boolean).length / 5 * 100);
       progressFill.style.width = progress + '%';
       progressText.textContent = progress + '%';
       updateScene(progress);
 
-      if (usesStatistics) {
-        statusBox.innerHTML = '检测到你直接调用了 <code>statistics</code> 模块。本关目标是手写函数。';
+      if (!runtimeOk) {
+        statusBox.innerHTML = '程序还没有成功运行。先把报错修掉；只要运行正确、输出正确，就可以通关。';
         return;
       }
-      if (progress === 0) statusBox.innerHTML = '现在还是最小骨架。先把 <strong>getNum()</strong> 从 <code>return []</code> 改成真正读取数据的版本。';
-      else if (progress <= 20) statusBox.innerHTML = '很好，已经有输入函数了。接下来去完成 <strong>mean()</strong>。';
-      else if (progress <= 40) statusBox.innerHTML = '平均值快有了。现在去完成 <strong>dev()</strong> 的平方差公式。';
-      else if (progress <= 60) statusBox.innerHTML = '已经过半了。去完成 <strong>median()</strong>，记得先排序。';
-      else if (progress <= 80) statusBox.innerHTML = '离胜利很近了。最后检查输出是否规范打印。';
-      else if (progress < 100) statusBox.innerHTML = '结构基本完整，再检查一遍公式和输出。';
-      else statusBox.innerHTML = '🎉 恭喜，你已经完成了极简骨架版这一关。';
+      if (outputOk) {
+        statusBox.innerHTML = '🎉 已通过：系统检测到你的程序运行正确，而且输出的平均值、标准差和中位数都正确。';
+        return;
+      }
+      if (progress === 0) statusBox.innerHTML = '先写出一个能运行的版本。多行输入、一行逗号输入、手写函数、调库版都可以。';
+      else if (progress <= 20) statusBox.innerHTML = '已经识别到输入相关代码了。下一步把平均值算出来。';
+      else if (progress <= 40) statusBox.innerHTML = '平均值思路已经有了。继续完成标准差或中位数。';
+      else if (progress <= 60) statusBox.innerHTML = '你已经过半了。现在重点检查标准差和中位数的实现。';
+      else if (progress <= 80) statusBox.innerHTML = '结构基本完整。最后确认输出值是不是正确结果。';
+      else statusBox.innerHTML = '已经很接近通关了。检查测试数据下的输出结果是否与正确答案一致。';
     }
 
     async function runCode() {
@@ -361,15 +391,21 @@ print(f"中位数: {md}")`;
         if (!pyodideReadyPromise) pyodideReadyPromise = loadEngine();
         const pyodide = await pyodideReadyPromise;
 
-        const inputs = ['120\n','150\n','90\n','200\n','180\n','60\n','\n'];
+        const codeLower = code.toLowerCase();
+        const useCommaInput = codeLower.includes('split(') || codeLower.includes('逗号');
+        const multiInputs = ['120\n','150\n','90\n','200\n','180\n','60\n','\n'];
+        const commaInput = ['120,150,90,200,180,60\n'];
+        const inputs = useCommaInput ? commaInput : multiInputs;
+
         let captured = '';
         let idx = 0;
+        let runtimeOk = false;
         const oldInput = pyodide.globals.get('input');
         const oldPrint = pyodide.globals.get('print');
 
         function fakeInput(prompt) {
           if (prompt) captured += String(prompt);
-          const value = inputs[idx] ?? '\n';
+          const value = inputs[idx] ?? (useCommaInput ? '\n' : '\n');
           idx += 1;
           captured += value;
           return value.replace(/\n$/, '');
@@ -383,6 +419,7 @@ print(f"中位数: {md}")`;
 
         try {
           await pyodide.runPythonAsync(code);
+          runtimeOk = true;
           outputEl.textContent = captured || '（程序没有输出内容）';
         } catch (err) {
           outputEl.textContent = '执行出错：\n' + err;
@@ -391,7 +428,7 @@ print(f"中位数: {md}")`;
           pyodide.globals.set('print', oldPrint);
         }
 
-        analyze(code, outputEl.textContent);
+        analyze(code, outputEl.textContent, runtimeOk);
       } catch (e) {
         outputEl.textContent = '加载或执行失败：' + e;
       } finally {
@@ -406,7 +443,7 @@ print(f"中位数: {md}")`;
       outputEl.textContent = '（运行结果会显示在这里）';
       progressFill.style.width = '0%';
       progressText.textContent = '0%';
-      statusBox.innerHTML = '先把 <strong>getNum()</strong> 补完整，让程序能读入多行数字。';
+      statusBox.innerHTML = '先写出一个能跑起来的版本。只要运行正确、输出正确，也可以通关。';
       dots.forEach(dot => dot.classList.remove('done'));
       updateScene(0);
     });
